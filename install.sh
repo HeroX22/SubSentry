@@ -13,3 +13,8 @@ git clone https://github.com/EdOverflow/can-i-take-over-xyz
 mv can-i-take-over-xyz fingerprints
 cd fingerprints
 mv fingerprints.json can-i-take-over-xyz_fingerprints.json
+
+#installasi selesai
+clear
+echo "install telah selesai"
+rm install.sh
