@@ -78,7 +78,7 @@ def main():
         sys.exit(1)
 
     sources = [
-        "anubis", "baidu", "bingapi", "brave", "certspotter", "crtsh",
+        "anubis", "baidu", "bingapi", "certspotter", "crtsh",
         "dnsdumpster", "duckduckgo", "hackertarget", "otx", "rapiddns",
         "sitedossier", "subdomaincenter", "subdomainfinderc99", "threatminer",
         "urlscan", "virustotal", "yahoo", "zoomeye"
