@@ -1,9 +1,9 @@
 #installation
-apt install theharvester
-apt install sublist3r
-apt install subfinder
-apt install git
-apt install wget
+apt install theharvester -y
+apt install sublist3r -y 
+apt install subfinder -y 
+apt install git -y 
+apt install wget -y
 
 #vul_detecition installation
 mkdir vuln_subsnipe
