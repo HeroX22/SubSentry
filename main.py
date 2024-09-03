@@ -41,7 +41,7 @@ def run_subfinder(target, verbose):
 
 def run_subsnipe(verbose):
     print("Running Subsnipe...")
-    command = "./subsnipe -f /home/cruz/subsnipe/domain.txt -t 30"
+    command = "./subsnipe -f vuln_subsnipe/domain.txt -t 30"
     if verbose:
         print(f"Command: {command}")
     result = subprocess.check_output(command, shell=True, text=True)
@@ -95,7 +95,7 @@ def main():
     
     # Save intermediate results to domain.txt
     print("Combining results into domain.txt...")
-    with open('/home/cruz/subsnipe/domain.txt', 'w') as file:
+    with open('vuln_subsnipe/domain.txt', 'w') as file:
         for result in harvester_results:
             file.write(result)
         file.write("\n")
@@ -145,8 +145,9 @@ def main():
     save_results(output_filename, subdomains, emails, vuln_results)
 
     # Cleanup
-    print("Cleaning up...")
-    os.remove('/home/cruz/subsnipe/domain.txt')
+    #print("Cleaning up...")
+    print("Debungging mode!")
+    #os.remove('vuln_subsnipe/domain.txt')
     print("Done.")
 
 if __name__ == "__main__":
