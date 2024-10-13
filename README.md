@@ -43,6 +43,9 @@
    -=subdomain=-
    (berisi seluruh subdomain dari semua alat)
 
+   -=IP-Addreas=-
+   (berisi seluruh ip addreas)
+
    -=E-Mail=-
    (berisi seluruh email)
 
@@ -55,16 +58,6 @@
 ```bash
 python3 sub_sentry.py --target example.com
 ```
-
-Output yang dihasilkan akan berupa file `example.com_subdomain.txt` dengan informasi subdomain, email, dan kerentanan yang terstruktur.
-
-## Kontribusi
-
-Jika Anda ingin berkontribusi pada proyek ini, silakan fork repositori ini dan ajukan pull request dengan perubahan Anda.
-
-## Lisensi
-
-MIT License. Lihat [LICENSE](LICENSE) untuk informasi lebih lanjut.
 
 ## Kontak
 
