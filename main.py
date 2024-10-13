@@ -1,43 +1,101 @@
 import subprocess
 import os
 import sys
+import re
 
 def run_theharvester(target, sources, verbose):
     print("Running theHarvester...")
-    results = []
-    for source in sources:
-        print(f"Searching with source: {source}")
-        command = f"theHarvester -d {target} -b {source}"
-        if verbose:
-            print(f"Command: {command}")
-        result = subprocess.check_output(command, shell=True, text=True)
-        results.append(result)
-        if verbose:
-            print(result)
-    print("theHarvester completed.")
-    return results
+    output_filename = f"theHarvester_{target}.txt"
+    with open(output_filename, 'w') as output_file:
+        for source in sources:
+            command = f"theHarvester -d {target} -b {source}"
+            if verbose:
+                print(f"Command: {command}")
+            result = subprocess.check_output(command, shell=True, text=True)
+            output_file.write(result)
+            output_file.write("\n")
+            if verbose:
+                print(result)
+    print(f"theHarvester results saved to {output_filename}.")
+    return output_filename
 
 def run_sublist3r(target, verbose):
     print("Running Sublist3r...")
-    command = f"sublist3r -d {target} -t 30"
+    command = f"sublist3r -o Sublist3r_{target}.txt -d {target} -t 30"
     if verbose:
         print(f"Command: {command}")
-    result = subprocess.check_output(command, shell=True, text=True)
-    if verbose:
-        print(result)
-    print("Sublist3r completed.")
-    return result
+    subprocess.run(command, shell=True)
+    print(f"Sublist3r results saved to Sublist3r_{target}.txt.")
 
 def run_subfinder(target, verbose):
     print("Running Subfinder...")
-    command = f"subfinder -d {target} -all"
+    command = f"subfinder -d {target} -all -o Subfinder_{target}.txt"
     if verbose:
         print(f"Command: {command}")
-    result = subprocess.check_output(command, shell=True, text=True)
-    if verbose:
-        print(result)
-    print("Subfinder completed.")
-    return result
+    subprocess.run(command, shell=True)
+    print(f"Subfinder results saved to Subfinder_{target}.txt.")
+
+def clean_theharvester_results(target):
+    print(f"Cleaning results from theHarvester...")
+    input_filename = f"theHarvester_{target}.txt"
+    output_filename = f"theHarvester_clean_{target}.txt"
+    email_filename = f"email_{target}.txt"
+    ip_filename = f"ip_address_{target}.txt"
+    
+    # Load the cleanup word list
+    with open('cleanup.txt', 'r') as cleanup_file:
+        cleanup_words = [line.strip() for line in cleanup_file]
+
+    cleaned_subdomains = set()
+    emails = set()
+    ip_addresses = set()
+
+    # Regular expression to match IP addresses
+    ip_regex = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
+
+    # Process theHarvester results
+    with open(input_filename, 'r') as infile, open(output_filename, 'w') as outfile, open(email_filename, 'w') as emailfile, open(ip_filename, 'w') as ipfile:
+        for line in infile:
+            cleaned_line = line.strip()
+            
+            if "@" in cleaned_line:
+                emails.add(cleaned_line)
+                emailfile.write(cleaned_line + "\n")
+            elif ip_regex.search(cleaned_line):
+                ip_addresses.add(cleaned_line)
+                ipfile.write(cleaned_line + "\n")
+            elif cleaned_line and not any(word in cleaned_line for word in cleanup_words):
+                cleaned_subdomains.add(cleaned_line)
+                outfile.write(cleaned_line + "\n")
+
+    print(f"Cleaned theHarvester results saved to {output_filename}, emails saved to {email_filename}, and IP addresses saved to {ip_filename}.")
+    return cleaned_subdomains
+
+def combine_and_deduplicate(target):
+    print("Combining and deduplicating results...")
+    all_subdomains = set()
+
+    # Load results from theHarvester
+    cleaned_subdomains = clean_theharvester_results(target)
+    all_subdomains.update(cleaned_subdomains)
+
+    # Load results from Sublist3r
+    with open(f"Sublist3r_{target}.txt", 'r') as sublist3r_file:
+        sublist3r_results = set(line.strip() for line in sublist3r_file if line.strip())
+        all_subdomains.update(sublist3r_results)
+
+    # Load results from Subfinder
+    with open(f"Subfinder_{target}.txt", 'r') as subfinder_file:
+        subfinder_results = set(line.strip() for line in subfinder_file if line.strip())
+        all_subdomains.update(subfinder_results)
+
+    # Remove duplicates and save to domain.txt
+    with open('domain.txt', 'w') as domain_file:
+        for subdomain in sorted(all_subdomains):
+            domain_file.write(subdomain + "\n")
+    
+    print("All subdomains combined and deduplicated in domain.txt.")
+    return all_subdomains
 
 def run_subsnipe(verbose):
     print("Running Subsnipe...")
@@ -45,33 +103,35 @@ def run_subsnipe(verbose):
     if verbose:
         print(f"Command: {command}")
     result = subprocess.check_output(command, shell=True, text=True)
-    if verbose:
-        print(result)
-    print("Subsnipe completed.")
+    with open('output.md', 'w') as output_file:
+        output_file.write(result)
+    print("Subsnipe results saved to output.md.")
     return result
 
-def save_results(filename, subdomains, emails, vuln_results):
-    print(f"Saving results to {filename}...")
-    with open(filename, 'w') as file:
-        file.write("-=subdomain=-\n")
-        for subdomain in subdomains:
-            file.write(f"{subdomain}\n")
+def save_final_results(target):
+    print(f"Saving final results to {target}_final.txt...")
+    with open('domain.txt', 'r') as domain_file, open(f"email_{target}.txt", 'r') as email_file, open(f"ip_address_{target}.txt", 'r') as ip_file, open('output.md', 'r') as vuln_file, open(f"{target}_final.txt", 'w') as final_file:
+        final_file.write("-=subdomain=-\n")
+        final_file.write(domain_file.read())
         
-        file.write("\n-=E-Mail=-\n")
-        for email in emails:
-            file.write(f"{email}\n")
+        final_file.write("\n-=E-Mail=-\n")
+        final_file.write(email_file.read())
         
-        file.write("\n-=Vuln=-\n")
-        file.write(vuln_results)
-    print("Results saved.")
+        final_file.write("\n-=IP-Address=-\n")
+        final_file.write(ip_file.read())
+        
+        final_file.write("\n-=Vuln=-\n")
+        final_file.write(vuln_file.read())
+    
+    print(f"Final results saved to {target}_final.txt.")
 
 def main():
-    if len(sys.argv) < 2 or (len(sys.argv) == 2 and sys.argv[1] != '--target='):
-        print("Usage: python3 script.py --target=domain.com [-v]")
+    if len(sys.argv) < 2 or (len(sys.argv) == 2 and not any(arg.startswith('-t') or arg.startswith('--target') for arg in sys.argv)):
+        print("Usage: python3 script.py -t domain.com [-v]")
         sys.exit(1)
 
-    verbose = '-v' in sys.argv
-    target = next((arg for arg in sys.argv if arg.startswith('--target=')), '').replace("--target=", "")
+    verbose = '-v' in sys.argv or '--verbose' in sys.argv
+    target = next((arg.split('=')[-1] for arg in sys.argv if arg.startswith('-t') or arg.startswith('--target')), None)
     
     if not target:
         print("Error: Target not specified.")
@@ -81,74 +141,26 @@ def main():
         "anubis", "baidu", "bingapi", "certspotter", "crtsh",
         "dnsdumpster", "duckduckgo", "hackertarget", "otx", "rapiddns",
         "sitedossier", "subdomaincenter", "subdomainfinderc99", "threatminer",
-        "urlscan", "virustotal", "yahoo", "zoomeye"
+        "urlscan", "virustotal", "yahoo"
     ]
 
     # Run theHarvester
-    harvester_results = run_theharvester(target, sources, verbose)
+    run_theharvester(target, sources, verbose)
     
-    # Run Sublist3r
-    sublist3r_results = run_sublist3r(target, verbose)
+    # Run Sublist3r (results saved automatically)
+    run_sublist3r(target, verbose)
     
-    # Run Subfinder
-    subfinder_results = run_subfinder(target, verbose)
+    # Run Subfinder (results saved automatically)
+    run_subfinder(target, verbose)
     
-    # Save intermediate results to domain.txt
-    print("Combining results into domain.txt...")
-    with open('domain.txt', 'w') as file:
-        for result in harvester_results:
-            file.write(result)
-        file.write("\n")
-        file.write(sublist3r_results)
-        file.write("\n")
-        file.write(subfinder_results)
-
-    # Run Subsnipe
-    vuln_results = run_subsnipe(verbose)
+    # Combine and deduplicate subdomains
+    combine_and_deduplicate(target)
     
-    # Process and remove duplicates
-    print("Processing results and removing duplicates...")
-    subdomains = set()
-    emails = set()
-    # Process theHarvester results
-    for result in harvester_results:
-        lines = result.splitlines()
-        is_email_section = False
-        for line in lines:
-            if "Emails found" in line:
-                is_email_section = True
-            elif "Hosts found" in line:
-                is_email_section = False
-            elif is_email_section:
-                if line:
-                    emails.add(line.strip())
-            elif line and line not in ["[*] Hosts found:", "---------------------"]:
-                subdomains.add(line.strip())
-
-    # Process Sublist3r results
-    lines = sublist3r_results.splitlines()
-    for line in lines:
-        if line and line not in ["[-] Total Unique Subdomains Found:", ""]:
-            subdomains.add(line.strip())
-
-    # Process Subfinder results
-    lines = subfinder_results.splitlines()
-    for line in lines:
-        if line and line not in ["[INF] Found", "subdomains for", "in"]:
-            subdomains.add(line.strip())
-
-    # Process vuln_results
-    vuln_results = vuln_results.replace('### Not Exploitable', '').replace('### Exploitability Unknown', '')
-
+    # Run Subsnipe for vulnerability analysis
+    run_subsnipe(verbose)
+    
     # Save final results
-    output_filename = f"{target}_subdomain.txt"
-    save_results(output_filename, subdomains, emails, vuln_results)
-
-    # Cleanup
-    #print("Cleaning up...")
-    print("Debungging mode!")
-    #os.remove('domain.txt')
-    print("Done.")
+    save_final_results(target)
 
 if __name__ == "__main__":
     main()
