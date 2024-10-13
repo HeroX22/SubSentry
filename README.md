@@ -58,10 +58,3 @@
 ```bash
 python3 sub_sentry.py --target example.com
 ```
-
-## Kontak
-
-Untuk pertanyaan atau dukungan, hubungi saya di [HeroX22](https://github.com/HeroX22).
-```
-
-Sesuaikan sesuai kebutuhan dan pastikan semua alat yang disebutkan terinstal dan berfungsi dengan baik. Jika ada tambahan fitur atau informasi, Anda bisa menambahkannya di README.
