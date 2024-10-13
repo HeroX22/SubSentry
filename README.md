@@ -9,7 +9,7 @@
 - **Pengecekan Kerentanan**: Menggunakan `subsnipe` untuk mengecek apakah subdomain memiliki kerentanan.
 - **Penghapusan Duplikasi**: Menghapus subdomain duplikat untuk hasil yang bersih dan terorganisir.
 - **Output Terstruktur**: Menghasilkan laporan dalam format yang jelas dengan bagian subdomain, email, dan kerentanan.
-
+```
 ## Instalasi
 
 1. **Clone Repository**
@@ -17,28 +17,20 @@
    ```bash
    git clone https://github.com/HeroX22/SubSentry.git
    cd SubSentry
+   chmod +x install.sh
+   ./install.sh
    ```
 
 2. **Instalasi Dependencies**
 
-   Pastikan alat-alat berikut terinstal dan dapat diakses melalui PATH:
-   - `theHarvester`
-   - `sublist3r`
-   - `subfinder`
-   - `subsnipe`
-
    Pastikan Python 3 terinstal. Install dependencies Python dengan pip:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## Penggunaan
 
 1. **Jalankan SubSentry**
 
    ```bash
-   python3 sub_sentry.py --target yourdomain.com
+   python3 sub_sentry.py --target=yourdomain.com
    ```
 
    Gantilah `yourdomain.com` dengan nama domain target yang ingin Anda analisis.
