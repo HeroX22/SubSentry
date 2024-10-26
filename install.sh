@@ -6,7 +6,7 @@ apt install git -y
 apt install wget -y
 
 #vul_detecition installation
-wget https://github.com/dub-flow/subsnipe/releases/download/v0.1.2/subsnipe-linux-amd64
+wget https://github.com/dub-flow/subsnipe/releases/download/v0.2.1/subsnipe-linux-amd64
 mv subsnipe-linux-amd64 subsnipe
 chmod +x subsnipe
 git clone https://github.com/EdOverflow/can-i-take-over-xyz
