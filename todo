@@ -1,0 +1,20 @@
+# Feature
+1. bisa ping (icmp, http, https)
+2. masukin output ke dalam folder
+3. buat wp-detection
+4. recomanded next tools
+
+# OUTPUT
+bikin output kayak gini
+```-=SUBDOMAIN=-
+-{ip}-
+subdomain1 (icmp, http, https check)
+subdomain2
+
+-=E-MAIL=-
+
+-=UNKOWN IP=-
+ip1
+ip2
+
+-=VULNS=-```
