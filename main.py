@@ -50,21 +50,39 @@ def clean_theharvester_results(target):
     emails = set()
     ip_addresses = set()
 
-    # Regular expression to match IP addresses
+    # Regular expressions
     ip_regex = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
+    subdomain_ip_regex = re.compile(r'([a-zA-Z0-9.-]+):(\d{1,3}(?:\.\d{1,3}){3})')
 
     # Process theHarvester results
     with open(input_filename, 'r') as infile, open(output_filename, 'w') as outfile, open(email_filename, 'w') as emailfile, open(ip_filename, 'w') as ipfile:
         for line in infile:
             cleaned_line = line.strip()
             
+            # Check for email
             if "@" in cleaned_line:
-                emails.add(cleaned_line)
-                emailfile.write(cleaned_line + "\n")
+                if cleaned_line not in emails:
+                    emails.add(cleaned_line)
+                    emailfile.write(cleaned_line + "\n")
+            
+            # Check for "subdomain:IP" pattern
+            elif subdomain_ip_match := subdomain_ip_regex.match(cleaned_line):
+                subdomain, ip = subdomain_ip_match.groups()
+                if subdomain not in cleaned_subdomains and not any(word in subdomain for word in cleanup_words):
+                    cleaned_subdomains.add(subdomain)
+                    outfile.write(subdomain + "\n")
+                if ip not in ip_addresses:
+                    ip_addresses.add(ip)
+                    ipfile.write(ip + "\n")
+            
+            # Check for standalone IP
             elif ip_regex.search(cleaned_line):
-                ip_addresses.add(cleaned_line)
-                ipfile.write(cleaned_line + "\n")
-            elif cleaned_line and not any(word in cleaned_line for word in cleanup_words):
+                if cleaned_line not in ip_addresses:
+                    ip_addresses.add(cleaned_line)
+                    ipfile.write(cleaned_line + "\n")
+            
+            # Add to subdomains if it’s not empty and not in cleanup words
+            elif cleaned_line and cleaned_line not in cleaned_subdomains and not any(word in cleaned_line for word in cleanup_words):
                 cleaned_subdomains.add(cleaned_line)
                 outfile.write(cleaned_line + "\n")
 
