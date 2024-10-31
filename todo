@@ -6,10 +6,15 @@
 
 # OUTPUT
 bikin output kayak gini
-```-=SUBDOMAIN=-
+
+-=SUBDOMAIN=-
 -{ip}-
-subdomain1 (icmp, http, https check)
-subdomain2
+subdomain1 (icmp, http, https)
+subdomain2 (icmp, http)
+
+-{ip2}-
+subdomain2 (https)
+subdomain3 (icmp, http, https)
 
 -=E-MAIL=-
 
@@ -17,4 +22,4 @@ subdomain2
 ip1
 ip2
 
--=VULNS=-```
+-=VULNS=-
